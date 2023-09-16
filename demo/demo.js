@@ -47,6 +47,10 @@ var selectedOption = '';
 
 var description = '';
 
+var selectedTime = '0:00';
+
+var popupInfo = ''
+
 var week_date = [];
 
 var curAdd, curRmv;
@@ -73,6 +77,46 @@ function getWeeksInMonth(a, b) {
 
 week_date = getWeeksInMonth(today.getMonth(), today.getFullYear())[2];
 
+function saveText() {
+    const timeValue = document.getElementById("timeInput").value;
+    selectedTime = timeValue;
+    // console.log('value is', value);
+
+}
+
+function togglePopup() {
+    var popup = document.getElementById('popupNoti');
+    popup.style.display = (popup.style.display === 'none') ? 'block' : 'none';
+}
+
+function updatePopupNotification() {
+    popupInfo = [];
+    //reset popup
+    console.log('active events', active_events)
+    var date = new Date(today);
+    var options = { month: 'long', day: 'numeric', year: 'numeric' };
+    var formattedDate = date.toLocaleDateString('en-US', options);
+    console.log(formattedDate);
+    for (var i = 0; i < active_events.length; i++) {
+        if (active_events[i].name === 'U & I' && formattedDate === active_events[i].date) {
+            popupInfo.push(active_events[i]);
+        }
+    }
+
+    var iconBadge = document.getElementById("iconBadge");
+    iconBadge.textContent = popupInfo.length.toString();
+    var popupNoti = document.getElementById("popupNoti");
+
+        // Clear existing content within the div
+    popupNoti.innerHTML = "";
+
+    // Loop through the array and create <p> elements for each item
+    popupInfo.forEach(function(info) {
+        var paragraph = document.createElement("p");
+        paragraph.textContent = info.description + ' is urgent and important. You have to do now 💪';
+        popupNoti.appendChild(paragraph);
+    });
+}
 
 function updateButton(option) {
     var dropdownButton = document.getElementById("dropdownMenuButton");
@@ -102,6 +146,8 @@ $(document).ready(function() {
 
         let curAdd = getRandom(events.length);
         events[curAdd].date = selectedDay;
+        events[curAdd].name = selectedOption;
+        events[curAdd].description = description;
         $("#demoEvoCalendar").evoCalendar("addCalendarEvent", {
             id: "imwyx6S",
             name: selectedOption,
@@ -116,6 +162,8 @@ $(document).ready(function() {
         $('#exampleModal').modal('hide');
         if (0 === events.length) a.target.disabled = !0;
         if (active_events.length > 0) $("#removeBtn").prop("disabled", !1);
+
+        updatePopupNotification();
 
     });
     $("#removeBtn").click(function(a) {
