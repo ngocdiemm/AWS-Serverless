@@ -162,6 +162,18 @@ $(document).ready(function() {
         $('#exampleModal').modal('hide');
         if (0 === events.length) a.target.disabled = !0;
         if (active_events.length > 0) $("#removeBtn").prop("disabled", !1);
+        $.ajax({
+            url: "https://cdzfebmsm9.execute-api.ap-southeast-1.amazonaws.com/Pro/",
+            type: 'POST',
+            data: JSON.stringify(active_events),
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+            document.getElementById("profileSaved").innerHTML = "Profile Saved!";
+            },
+            error: function () {
+            alert("error");
+            }
+        });
 
         updatePopupNotification();
 
