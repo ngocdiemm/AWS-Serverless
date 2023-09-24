@@ -149,7 +149,7 @@ $(document).ready(function() {
         events[curAdd].name = selectedOption;
         events[curAdd].description = description;
         $("#demoEvoCalendar").evoCalendar("addCalendarEvent", {
-            id: "imwyx6S",
+            id: events[curAdd].id,
             name: selectedOption,
             description: description,
             date: selectedDay,
@@ -174,15 +174,33 @@ $(document).ready(function() {
             alert("error");
             }
         });
-
         updatePopupNotification();
 
     });
     $("#removeBtn").click(function(a) {
-        curRmv = 0;
-        $("#demoEvoCalendar").evoCalendar("removeCalendarEvent", active_events[curRmv].id);
-        events.push(active_events[curRmv]);
-        active_events.splice(curRmv, 1);
+        var selectedDay = $("#demoEvoCalendar").evoCalendar("getActiveDate");
+        console.log(selectedDay);
+        console.log(active_events);
+        for(var i = 0; i < active_events.length; i++) {
+    
+            if (selectedDay === active_events[i].date) {
+                $("#demoEvoCalendar").evoCalendar("removeCalendarEvent", active_events[i].id);
+                $.ajax({
+                    url: "https://cdzfebmsm9.execute-api.ap-southeast-1.amazonaws.com/Pro",
+                    type: 'DELETE',
+                    data: JSON.stringify({ 'EventID': active_events[i].id}),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                    document.getElementById("profileSaved").innerHTML = "Profile Saved!";
+                    },
+                    error: function () {
+                    alert("error");
+                    }
+                });
+                active_events.splice(i, 1);
+            }
+        }
+       // events.push(active_events[curRmv]);
         if (0 === active_events.length) a.target.disabled = !0;
         if (events.length > 0) $("#addBtn").prop("disabled", !1);
     });
