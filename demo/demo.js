@@ -136,7 +136,7 @@ $(document).ready(function() {
         titleFormat: "MM",
         calendarEvents: []
     });
-
+    
     $("[data-set-theme]").click(function(b) {
         a(b.target);
     });
@@ -158,10 +158,11 @@ $(document).ready(function() {
         active_events.push(events[curAdd]);
         $("#demoEvoCalendar").evoCalendar('addCalendarEvent', curAdd);
         events.splice(curAdd, 1);
-
+        
         $('#exampleModal').modal('hide');
         if (0 === events.length) a.target.disabled = !0;
         if (active_events.length > 0) $("#removeBtn").prop("disabled", !1);
+        // Retrieve the logged-in email from localStorage
         $.ajax({
             url: "https://cdzfebmsm9.execute-api.ap-southeast-1.amazonaws.com/Pro/",
             type: 'POST',
