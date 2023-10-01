@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  NotUrgentImportantNotification:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+        DestinationConfig:
+          OnFailure:
+            Destination: arn:aws:sns:ap-southeast-1:226719017722:MyTaskReminderNotification
+            Type: SNS
+      EphemeralStorage:
+        Size: 512
+      Events:
+        DynamoDB1:
+          Type: DynamoDB
+          Properties:
+            Stream:
+              Fn::GetAtt:
+                - Table1
+                - StreamArn
+            StartingPosition: LATEST
+            BatchSize: 100
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+      SnapStart:
+        ApplyOn: None
+      PackageType: Zip
+      Policies:
+        Statement:
+          - Effect: Allow
+            Action:
+              - '*'
+            Resource: '*'
+  Table1:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
