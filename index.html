@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,16 +56,7 @@
 </head>
 <body>
         <header>
-            <!-- Sign up -->
-<div >
-    <span onclick="togglePopup()" class="material-icons" id="notificationIcon">notifications</span>
-    <span id="iconBadge" class="icon-button__badge">0</span>
-</div>
-
-<div id="popupNoti">
     
-</div>
-
 
 <script>
 // Get the modal
@@ -77,7 +70,9 @@ window.onclick = function(event) {
 }
 </script>
 
- 
+            <!-- Login  href = ... đó là gắn đường link bên login của AWS -->
+<button id="btnLogin" onclick="window.location.href='https://mytaskreminder.auth.ap-southeast-1.amazoncognito.com/login?client_id=1p81t1vl1noev67brpatnnqt2f&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A5500%2Findex.html'" style="width:auto;">Login</button>
+
 <script>
 // Get the modal
 var modal = document.getElementById('id01');
