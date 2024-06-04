@@ -5,7 +5,7 @@ States:
     Type: Task
     Resource: >-
       arn:aws:lambda:ap-southeast-1:226719017722:function:MyTaskReminder_StartStateMachine
-    ResultPath: $.status
+    ResultPath: $
     Next: CheckStatus
   CheckStatus:
     Type: Choice
@@ -33,37 +33,21 @@ States:
     Type: Task
     Resource: >-
       arn:aws:lambda:ap-southeast-1:226719017722:function:Urgent-ImportantNotification
-    Parameters:
-      EventType.$: $.EventType
-      UserName.$: $.UserName
-      Email.$: $.Email
     End: true
   Urgent-UnimportantNoti:
     Type: Task
     Resource: >-
       arn:aws:lambda:ap-southeast-1:226719017722:function:Urgent-UnimportantNotification
-    Parameters:
-      EventType.$: $.EventType
-      UserName.$: $.UserName
-      Email.$: $.Email
     End: true
   NotUrgent-ImportantNoti:
     Type: Task
     Resource: >-
       arn:aws:lambda:ap-southeast-1:226719017722:function:NotUrgent-ImportantNotification
-    Parameters:
-      EventType.$: $.EventType
-      UserName.$: $.UserName
-      Email.$: $.Email
     End: true
   NotUrgent-UmimportantNoti:
     Type: Task
     Resource: >-
       arn:aws:lambda:ap-southeast-1:226719017722:function:NotUrgent_UnimportantNotification
-    Parameters:
-      EventType.$: $.EventType
-      UserName.$: $.UserName
-      Email.$: $.Email
     End: true
   TaskNotification:
     Type: Fail

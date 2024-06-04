@@ -1,55 +1,39 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: An AWS Serverless Specification template describing your function.
-Resources:
-  MyTaskReminderStartStateMachine:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Description: ''
-      MemorySize: 128
-      Timeout: 3
-      Handler: lambda_function.lambda_handler
-      Runtime: python3.11
-      Architectures:
-        - x86_64
-      EventInvokeConfig:
-        MaximumEventAgeInSeconds: 21600
-        MaximumRetryAttempts: 2
-      EphemeralStorage:
-        Size: 512
-      Events:
-        DynamoDB1:
-          Type: DynamoDB
-          Properties:
-            Stream:
-              Fn::GetAtt:
-                - Table1
-                - StreamArn
-            StartingPosition: LATEST
-            BatchSize: 100
-      RuntimeManagementConfig:
-        UpdateRuntimeOn: Auto
-      SnapStart:
-        ApplyOn: None
-      PackageType: Zip
-      Policies:
-        Statement:
-          - Effect: Allow
-            Action:
-              - '*'
-            Resource: '*'
-  Table1:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
-      StreamSpecification:
-        StreamViewType: NEW_IMAGE
+import json
+import datetime
+
+def lambda_handler(event, context):
+    # TODO implement
+    # return {
+    #     'statusCode': 200,
+    #     'body': json.dumps('Hello from Lambda!')
+    # }
+    
+    # Extract event details from the input event
+    event_date_str = event.get('EventDate')
+    current_date = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+
+    # Parse the event date
+    try:
+        event_date = datetime.datetime.strptime(event_date_str, "%B %d, %Y")
+    except ValueError as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'message': 'Invalid date format. Expected format is %B %d, %Y.',
+                'error': str(e)
+            })
+        }
+
+    # Compare dates
+    if event_date <= current_date + datetime.timedelta(days=1):
+        status = "IfDue"
+    else:
+        status = "NotDue"
+
+    # Return the status
+    return {
+        'status': status,
+        'EventType': event.get('EventType', 'NotUrgent-Unimportant'),
+        'EventDate': event.get('EventDate', 'Unknow'),
+        'UserId': event.get('UserId', 'fd5d7576-956f-4210-aea8-5c3ea3baa44e')
+    }

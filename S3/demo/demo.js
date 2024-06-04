@@ -1,44 +1,48 @@
+const USER_POOL_ID = "ap-southeast-1_eJfA6tF52"
+const TOKEN_URL = `https://cognito-idp.ap-southeast-1.amazonaws.com/${USER_POOL_ID}/.well-known/jwks.json`
+
 var defaultTheme = getRandom(4);
 
 var today = new Date();
 
 var events = [ {
     id: "imwyx6S",
-    name: "Event #3",
-    description: "Lorem ipsum dolor sit amet.",
+    name: "Deadline thay Hung",
+    type: "Urgent-Important",
+    description: "Lorem ipsum dolor sit amet."
     // date: today,
-    type: "event"
+    
 }, {
     id: "9jU6g6f",
-    name: "Holiday #1",
+    name: "Deadline thay Hung",
     description: "Lorem ipsum dolor sit amet.",
     // date: today,
-    type: "holiday"
+    type: "Urgent-Unimportant"
 }, {
     id: "0g5G6ja",
-    name: "Event #1",
+    name: "Deadline thay Hung",
     description: "Lorem ipsum dolor sit amet.",
     // date: today,
-    type: "event",
+    type: "Not Urgent-Important",
     everyYear: !0
 }, {
     id: "y2u7UaF",
-    name: "Holiday #3",
+    name: "Deadline thay Hung",
     description: "Lorem ipsum dolor sit amet.",
     // date: today,
-    type: "holiday"
+    type: "NotUrgent-Unimportant"
 }, {
     id: "dsu7HUc",
-    name: "Birthday #1",
+    name: "Deadline thay Hung",
     description: "Lorem ipsum dolor sit amet.",
     // date: today,
-    type: "birthday"
+    type: "Urgent-Unimportant"
 }, {
     id: "dsu7HUc",
-    name: "Birthday #2",
+    name: "Deadline thay Hung",
     description: "Lorem ipsum dolor sit amet.",
     // date: today,
-    type: "birthday"
+    type: "Urgent-Unimportant"
 } ];
 
 var active_events = [];
@@ -98,7 +102,7 @@ function updatePopupNotification() {
     var formattedDate = date.toLocaleDateString('en-US', options);
     console.log(formattedDate);
     for (var i = 0; i < active_events.length; i++) {
-        if (active_events[i].name === 'U & I' && formattedDate === active_events[i].date) {
+        if (active_events[i].name === 'Urgent-Important' && formattedDate === active_events[i].date) {
             popupInfo.push(active_events[i]);
         }
     }
@@ -146,14 +150,15 @@ $(document).ready(function() {
 
         let curAdd = getRandom(events.length);
         events[curAdd].date = selectedDay;
-        events[curAdd].name = selectedOption;
+        events[curAdd].name = description;
         events[curAdd].description = description;
+        events[curAdd].type = selectedOption;
         $("#demoEvoCalendar").evoCalendar("addCalendarEvent", {
             id: events[curAdd].id,
-            name: selectedOption,
-            description: description,
+            name: description,
+            //description: description,
             date: selectedDay,
-            type: "event"
+            type:  selectedOption,
         });
         active_events.push(events[curAdd]);
         $("#demoEvoCalendar").evoCalendar('addCalendarEvent', curAdd);
@@ -163,10 +168,11 @@ $(document).ready(function() {
         if (0 === events.length) a.target.disabled = !0;
         if (active_events.length > 0) $("#removeBtn").prop("disabled", !1);
         // Retrieve the logged-in email from localStorage
+
         $.ajax({
-            url: "https://cdzfebmsm9.execute-api.ap-southeast-1.amazonaws.com/Pro/",
+            url: "https://ksq6lkfppl.execute-api.ap-southeast-1.amazonaws.com/Prod/",
             type: 'POST',
-            data: JSON.stringify(active_events),
+            data: JSON.stringify([active_events[active_events.length - 1]]),
             contentType: 'application/json; charset=utf-8',
             success: function (response) {
             document.getElementById("profileSaved").innerHTML = "Profile Saved!";
@@ -187,7 +193,7 @@ $(document).ready(function() {
             if (selectedDay === active_events[i].date) {
                 $("#demoEvoCalendar").evoCalendar("removeCalendarEvent", active_events[i].id);
                 $.ajax({
-                    url: "https://cdzfebmsm9.execute-api.ap-southeast-1.amazonaws.com/Pro",
+                    url: "https://ksq6lkfppl.execute-api.ap-southeast-1.amazonaws.com/Prod/",
                     type: 'DELETE',
                     data: JSON.stringify({ 'EventID': active_events[i].id}),
                     contentType: 'application/json; charset=utf-8',

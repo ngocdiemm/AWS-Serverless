@@ -1,124 +1,64 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: An AWS Serverless Specification template describing your function.
-Resources:
-  MyTaskReminderAddEvent:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Description: ''
-      MemorySize: 128
-      Timeout: 3
-      Handler: lambda_function.lambda_handler
-      Runtime: python3.11
-      Architectures:
-        - x86_64
-      EventInvokeConfig:
-        MaximumEventAgeInSeconds: 21600
-        MaximumRetryAttempts: 2
-      EphemeralStorage:
-        Size: 512
-      Events:
-        Api1:
-          Type: Api
-          Properties:
-            Path: /
-            Method: POST
-      RuntimeManagementConfig:
-        UpdateRuntimeOn: Auto
-      SnapStart:
-        ApplyOn: None
-      PackageType: Zip
-      Policies:
-        Statement:
-          - Effect: Allow
-            Action:
-              - sns:Publish
-            Resource: arn:aws:sns:ap-southeast-1:226719017722:MyTaskReminderNotification
-          - Action:
-              - dynamodb:*
-              - dax:*
-              - application-autoscaling:DeleteScalingPolicy
-              - application-autoscaling:DeregisterScalableTarget
-              - application-autoscaling:DescribeScalableTargets
-              - application-autoscaling:DescribeScalingActivities
-              - application-autoscaling:DescribeScalingPolicies
-              - application-autoscaling:PutScalingPolicy
-              - application-autoscaling:RegisterScalableTarget
-              - cloudwatch:DeleteAlarms
-              - cloudwatch:DescribeAlarmHistory
-              - cloudwatch:DescribeAlarms
-              - cloudwatch:DescribeAlarmsForMetric
-              - cloudwatch:GetMetricStatistics
-              - cloudwatch:ListMetrics
-              - cloudwatch:PutMetricAlarm
-              - cloudwatch:GetMetricData
-              - datapipeline:ActivatePipeline
-              - datapipeline:CreatePipeline
-              - datapipeline:DeletePipeline
-              - datapipeline:DescribeObjects
-              - datapipeline:DescribePipelines
-              - datapipeline:GetPipelineDefinition
-              - datapipeline:ListPipelines
-              - datapipeline:PutPipelineDefinition
-              - datapipeline:QueryObjects
-              - ec2:DescribeVpcs
-              - ec2:DescribeSubnets
-              - ec2:DescribeSecurityGroups
-              - iam:GetRole
-              - iam:ListRoles
-              - kms:DescribeKey
-              - kms:ListAliases
-              - sns:CreateTopic
-              - sns:DeleteTopic
-              - sns:ListSubscriptions
-              - sns:ListSubscriptionsByTopic
-              - sns:ListTopics
-              - sns:Subscribe
-              - sns:Unsubscribe
-              - sns:SetTopicAttributes
-              - lambda:CreateFunction
-              - lambda:ListFunctions
-              - lambda:ListEventSourceMappings
-              - lambda:CreateEventSourceMapping
-              - lambda:DeleteEventSourceMapping
-              - lambda:GetFunctionConfiguration
-              - lambda:DeleteFunction
-              - resource-groups:ListGroups
-              - resource-groups:ListGroupResources
-              - resource-groups:GetGroup
-              - resource-groups:GetGroupQuery
-              - resource-groups:DeleteGroup
-              - resource-groups:CreateGroup
-              - tag:GetResources
-              - kinesis:ListStreams
-              - kinesis:DescribeStream
-              - kinesis:DescribeStreamSummary
-            Effect: Allow
-            Resource: '*'
-          - Action:
-              - cloudwatch:GetInsightRuleReport
-            Effect: Allow
-            Resource: arn:aws:cloudwatch:*:*:insight-rule/DynamoDBContributorInsights*
-          - Action:
-              - iam:PassRole
-            Effect: Allow
-            Resource: '*'
-            Condition:
-              StringLike:
-                iam:PassedToService:
-                  - application-autoscaling.amazonaws.com
-                  - application-autoscaling.amazonaws.com.cn
-                  - dax.amazonaws.com
-          - Effect: Allow
-            Action:
-              - iam:CreateServiceLinkedRole
-            Resource: '*'
-            Condition:
-              StringEquals:
-                iam:AWSServiceName:
-                  - replication.dynamodb.amazonaws.com
-                  - dax.amazonaws.com
-                  - dynamodb.application-autoscaling.amazonaws.com
-                  - contributorinsights.dynamodb.amazonaws.com
-                  - kinesisreplication.dynamodb.amazonaws.com
+import json
+import boto3
+import os
+
+# Khởi tạo tài nguyên DynamoDB
+dynamodb = boto3.resource('dynamodb')
+# Lấy tên bảng từ biến môi trường
+table_name = os.environ['TABLE_NAME']
+table = dynamodb.Table(table_name)
+
+def lambda_handler(event, context):
+    try:
+        # Kiểm tra xem có phần thân trong sự kiện không
+        if 'body' not in event:
+            raise KeyError('body')
+        
+        # Lấy dữ liệu từ phần thân của sự kiện (JSON body từ API Gateway)
+        body = json.loads(event['body'])
+        for res_item in body:
+            item = {
+                'EventID': res_item['id'],
+                'EventType': res_item['type'],
+                'EventName': res_item['name'],
+                'EventDate': res_item['date']
+            }
+            # Ghi dữ liệu vào DynamoDB
+            table.put_item(Item=item)
+        
+        # res_item = table.get_item(
+        #     Key={
+        #         'EventID': body['id']
+        #     }
+        # )
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
+            'body': json.dumps({'msg':'Item added to DynamoDB'})
+        }
+    except KeyError as e:
+        return {
+            'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
+            'body': json.dumps(f'Missing key: {str(e)}')
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
+            'body': json.dumps(f'Error: {str(e)}')
+        }
+

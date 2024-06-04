@@ -963,7 +963,7 @@ input[type=text], input[type=password] {
   .icon-button__badge {
     position: absolute;
     top: 0.3rem;
-    right: 1rem;
+    right: 7rem;
     width: 25px;
     height: 25px;
     background: red;
@@ -982,18 +982,18 @@ input[type=text], input[type=password] {
     right: 13rem;
     /* index: 2; */
     z-index: 10;
-    right: 15px;
+    right: 110px;
     font-size: xxx-large;
   }
   
   #popupNoti {
     position: absolute;
     background-color: pink;
-    right: 2rem;
     top: 2.5rem;
     box-shadow: 0 10px 20px -5px rgba(19, 31, 51, .65);
     border-radius: 0.5rem;
     padding: 1rem;
     z-index: 9;
-    display: none
+    display: none;
+    right: 7.3rem;
   }
